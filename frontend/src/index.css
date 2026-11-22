@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* `dark:` utilities apply when <html> has the .dark class (toggled by useTheme),
+   instead of Tailwind's default of following only the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens: lavender (brand) + peach accents, like the reference design */
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #f4f2ff;
+  --color-brand-100: #e9e5ff;
+  --color-brand-200: #d4ccff;
+  --color-brand-300: #b6aafc;
+  --color-brand-400: #9888f8;
+  --color-brand-500: #7b6cf6;
+  --color-brand-600: #6853e6;
+  --color-brand-700: #5642c4;
+
+  --color-peach-100: #ffece3;
+  --color-peach-200: #ffd8c6;
+  --color-peach-300: #fcbc9f;
+  --color-peach-400: #f69e7b;
+  --color-peach-500: #ee815a;
+
+  --color-ink: #16141f;
+  /* card/surface color used by dark:bg-surface */
+  --color-surface: #1e1a2c;
+}
+
+/* Dark theme: "ink" (main text color) becomes light, so text-ink works in both themes */
+.dark {
+  --color-ink: #ecebf5;
+  color-scheme: dark; /* native inputs, selects and scrollbars go dark too */
+}
+
+.dark body {
+  background-color: #110f19;
+  background-image:
+    radial-gradient(900px 500px at 10% -10%, #2a2150 0%, transparent 60%),
+    radial-gradient(700px 500px at 100% 0%, #3a2320 0%, transparent 55%),
+    radial-gradient(800px 600px at 50% 110%, #1e1838 0%, transparent 60%);
+}
+
+/* Recharts draws grid/cursor with fixed light colors; CSS beats SVG attributes */
+.dark .recharts-cartesian-grid line {
+  stroke: #2e2a40;
+}
+.dark .recharts-tooltip-cursor {
+  fill: #ffffff10;
+}
+.dark .scroll-thin {
+  scrollbar-color: #3d3466 transparent;
+}
+
+body {
+  @apply text-ink antialiased;
+  min-height: 100vh;
+  background-color: #f3f1f8;
+  /* Soft blurred blobs behind the glass cards */
+  background-image:
+    radial-gradient(900px 500px at 10% -10%, #e4ddff 0%, transparent 60%),
+    radial-gradient(700px 500px at 100% 0%, #ffe3d4 0%, transparent 55%),
+    radial-gradient(800px 600px at 50% 110%, #ece8ff 0%, transparent 60%);
+  background-attachment: fixed;
+}
+
+/* Thin scrollbars inside cards */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #d4ccff transparent;
+}
+
+/* Recharts focus outline off */
+.recharts-wrapper *:focus {
+  outline: none;
+}
+
+/* Diagonal stripes behind the "Fluxo do mês" bars (the empty part of each column) */
+.hatch {
+  background-image: repeating-linear-gradient(-45deg, rgb(22 20 31 / 0.07) 0 1px, transparent 1px 7px);
+  box-shadow: inset 0 0 0 1px rgb(22 20 31 / 0.08);
+}
+.dark .hatch {
+  background-image: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.07) 0 1px, transparent 1px 7px);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+}
