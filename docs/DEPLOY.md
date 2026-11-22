@@ -77,8 +77,12 @@ Depois disso o banco é a fonte da verdade.
    | Framework Preset | Vite (detectado sozinho) |
    | Build Command | `npm run build` |
    | Output Directory | `dist` |
-4. **Environment Variables** → adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`
-   (marque Production, Preview e Development).
+4. **Variáveis de ambiente** — duas opções:
+   - **Integração Supabase da Vercel** (aba *Storage* / *Integrations*): ela cria sozinha
+     `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `POSTGRES_*`, `SUPABASE_SECRET_KEY`...
+     O app já lê as `NEXT_PUBLIC_*` (veja `envPrefix` em `vite.config.js`). **Não apague nenhuma**:
+     são gerenciadas pela integração, e as sem prefixo (secretas) nunca vão para o navegador.
+   - **Manual**: adicione `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` (Production e Preview).
 5. **Deploy**. Copie a URL gerada e volte ao passo **1.4** para colocá-la como *Site URL*.
 
 Notas:
@@ -99,7 +103,7 @@ Notas:
 | Sintoma | Causa provável |
 | --- | --- |
 | Tela branca na Vercel | Root Directory não está em `frontend`. |
-| App abre sem tela de login na Vercel | Variáveis não configuradas, ou adicionadas sem redeploy. |
+| App abre sem tela de login na Vercel | Variáveis não configuradas, ou adicionadas sem redeploy. Confira se o bundle contém `supabase.co`. |
 | "Erro ao sincronizar" | `schema.sql` não foi executado, ou chave/URL erradas. Veja o console (F12). |
 | Link do e-mail leva para `localhost` | *Site URL* ainda está como localhost (passo 1.4). |
 | "Email not confirmed" | Clique no link de confirmação no seu e-mail. |
