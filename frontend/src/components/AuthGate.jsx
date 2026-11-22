@@ -33,55 +33,73 @@ export function Splash({ text }) {
 }
 
 function Login() {
+  const [mode, setMode] = useState("login"); // "login" | "signup"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null); // { type: "error" | "info", text }
+  const signup = mode === "signup";
 
-  async function submit(mode) {
+  async function submit(e) {
+    e.preventDefault(); // browser already checked required / e-mail format / minLength
     setBusy(true);
     setMsg(null);
-    const { data, error } =
-      mode === "signup"
-        ? await supabase.auth.signUp({
-            email,
-            password,
-            // where the confirmation e-mail link sends the user back (localhost or the Vercel URL)
-            options: { emailRedirectTo: window.location.origin },
-          })
-        : await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = signup
+      ? await supabase.auth.signUp({
+          email,
+          password,
+          // where the confirmation e-mail link sends the user back (localhost or the Vercel URL)
+          options: { emailRedirectTo: window.location.origin },
+        })
+      : await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) return setMsg({ type: "error", text: translate(error.message) });
     // signUp with "Confirm email" enabled returns a user but no session yet
-    if (mode === "signup" && !data.session) {
-      setMsg({ type: "info", text: "Conta criada! Confirme pelo link enviado ao seu e-mail e depois entre." });
+    if (signup && !data.session) {
+      setMode("login");
+      setPassword("");
+      setMsg({ type: "info", text: `Conta criada! Abra o link enviado para ${email} (veja o spam) e depois entre.` });
     }
+  }
+
+  function switchMode() {
+    setMode(signup ? "login" : "signup");
+    setMsg(null);
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-sm">
-        <div className="mb-5 flex items-center gap-2">
+        <div className="mb-1 flex items-center gap-2">
           <Feather className="size-6 -rotate-12" strokeWidth={2.4} />
           <span className="text-lg font-semibold tracking-tight">Salary</span>
         </div>
-        <form
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit("login");
-          }}
-        >
+        <p className="mb-5 text-sm text-zinc-500">{signup ? "Crie sua conta" : "Entre na sua conta"}</p>
+        <form className="space-y-3" onSubmit={submit}>
           <Input type="email" placeholder="E-mail" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Input type="password" placeholder="Senha (mín. 6)" autoComplete="current-password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Input
+            type="password"
+            placeholder={signup ? "Senha (mínimo 6 caracteres)" : "Senha"}
+            autoComplete={signup ? "new-password" : "current-password"}
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
           {msg && (
-            <p className={msg.type === "error" ? "text-sm text-rose-600" : "text-sm text-emerald-700"}>{msg.text}</p>
+            <p className={msg.type === "error" ? "text-sm text-rose-500" : "text-sm text-emerald-500"}>{msg.text}</p>
           )}
-          <Button type="submit" className="w-full" disabled={busy}>Entrar</Button>
-          <Button type="button" variant="ghost" className="w-full" disabled={busy || !email || password.length < 6} onClick={() => submit("signup")}>
-            Criar conta
+          <Button type="submit" className="w-full" disabled={busy}>
+            {busy && <LoaderCircle className="size-4 animate-spin" />}
+            {signup ? "Criar conta" : "Entrar"}
           </Button>
         </form>
+        <p className="mt-4 text-center text-sm text-zinc-500">
+          {signup ? "Já tem conta? " : "Ainda não tem conta? "}
+          <button type="button" onClick={switchMode} className="cursor-pointer font-medium text-brand-500 hover:underline">
+            {signup ? "Entrar" : "Criar conta"}
+          </button>
+        </p>
       </Card>
     </div>
   );
@@ -90,7 +108,10 @@ function Login() {
 const translate = (m) =>
   ({
     "Invalid login credentials": "E-mail ou senha incorretos.",
-    "Email not confirmed": "Confirme seu e-mail antes de entrar.",
-    "User already registered": "Este e-mail já tem conta.",
+    "Email not confirmed": "Confirme seu e-mail antes de entrar (veja o link na sua caixa de entrada).",
+    "User already registered": "Este e-mail já tem conta. Use Entrar.",
     "Signups not allowed for this instance": "Cadastro de novas contas está desativado.",
+    "email rate limit exceeded": "Limite de e-mails da Supabase atingido. Espere alguns minutos e tente de novo.",
+    "Password should be at least 6 characters.": "A senha precisa ter pelo menos 6 caracteres.",
+    "Failed to fetch": "Sem conexão com o servidor. Verifique sua internet.",
   })[m] ?? m;
